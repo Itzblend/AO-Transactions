@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  db:
+    image: postgres:12
+    restart: always
+    container_name: db
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 2s
+      timeout: 3s
+      retries: 5
+
+  db-init:
+    image: postgres:12
+    container_name: db-init
+    environment:
+      PGPASSWORD: postgres
+    volumes:
+      - ./init.sql:/init.sql
+    command: ["psql", "-U", "postgres", "-h", "db", "-f", "/init.sql"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:10.0.3
+    restart: always
+    container_name: grafana
+    ports:
+      - 3000:3000
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - ./docker/grafana/lib:/var/lib/grafana
+
+
