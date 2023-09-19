@@ -40,6 +40,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: admin
       GF_INSTALL_PLUGINS: grafana-piechart-panel
     volumes:
-      - ./docker/grafana/lib:/var/lib/grafana
+      - docker-data:/var/lib/grafana
 
-
+volumes:
+  docker-data:
